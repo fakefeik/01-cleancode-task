@@ -14,11 +14,11 @@ namespace CleanCode
 	        }
 	    }
 
-		private static void SaveData(string s, byte[] d)
+		private static void SaveData(string filename, byte[] data)
 		{
-		    SaveToFile(s, d);
-		    SaveToFile(Path.ChangeExtension(s, "bkp"), d);
-            SaveToFile(s + ".time", BitConverter.GetBytes((DateTime.Now.Ticks)));
+		    SaveToFile(filename, data);
+		    SaveToFile(Path.ChangeExtension(filename, "bkp"), data);
+            SaveToFile(filename + ".time", BitConverter.GetBytes((DateTime.Now.Ticks)));
 		}
 	}
 }
