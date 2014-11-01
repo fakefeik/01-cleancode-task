@@ -1,52 +1,50 @@
-﻿namespace CleanCode
+﻿using System.Linq;
+
+namespace CleanCode
 {
+    public enum Status
+    {
+        Check,
+        Mate, 
+        Ok,
+        Stalemate
+    }
+
 	public class Chess
 	{
-		private readonly Board b;
+		private readonly Board board;
 
-		public Chess(Board b)
+		public Chess(Board board)
 		{
-		this.b = b;
+		    this.board = board;
 		}
 
-		public string getWhiteStatus() {
-			bool bad=checkForWhite();
-			bool ok=  false;
-			foreach (Loc loc1 in b.Figures(Cell.White))
-			{
-				foreach (Loc loc2 in b.Get(loc1).Figure.Moves(loc1, b)){
-				Cell old_dest = b.PerformMove(loc1, loc2);
-				if (!checkForWhite( ))
-					ok = true;
-				b.PerformUndoMove(loc1, loc2, old_dest);
-				}
-				
-				
-				
-			}
-			if (bad)
-				if (ok)
-					return "check";
-				else return "mate";
-				if (ok)	return "ok";
-			return "stalemate";
-		}
+	    public Status GetWhiteStatus()
+	    {
+	        var isWhiteChecked = CheckForWhite();
+	        var uncheckingMoveExists = false;
+	        foreach (var whiteLoc in board.Figures(Cell.White))
+	            foreach (var nextLoc in board.Get(whiteLoc).Figure.Moves(whiteLoc, board))
+	            {
+	                var oldDest = board.PerformMove(whiteLoc, nextLoc);
+	                if (!CheckForWhite())
+	                    uncheckingMoveExists = true;
+	                board.PerformUndoMove(whiteLoc, nextLoc, oldDest);
+	            }
 
-		private bool checkForWhite()
-		{
-			bool bFlag = false;
-			foreach (Loc loc in b.Figures(Cell.Black))
-			{
-				var cell = b.Get(loc);
-				var moves = cell.Figure.Moves(loc, b);
-				foreach (Loc to in moves)
-				{
-					if (b.Get(to).IsWhiteKing)
-						bFlag = true;
-				}
-			}
-			if (bFlag) return true;
-			return false;
-		}
+	        if (isWhiteChecked)
+	            return uncheckingMoveExists ? Status.Check : Status.Mate;
+	        return uncheckingMoveExists ? Status.Ok : Status.Stalemate;
+	    }
+
+	    private bool CheckForWhite()
+	    {
+	        return board
+                .Figures(Cell.Black)
+                .Any(loc => board.Get(loc)
+                    .Figure
+                    .Moves(loc, board)
+                    .Any(x => board.Get(x).IsWhiteKing));
+	    }
 	}
 }
